@@ -26,6 +26,6 @@ Markdown formatted content should be here.
     <!-- Rendered Content. Do not edit or remove. -->
     <div id="renderedContent" class="content">
     </div>
-    <script src="/../common/showdown.js"></script>
+    <script src="/js/showdown.js"></script>
 </body>
 </html>
