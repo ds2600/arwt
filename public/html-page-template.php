@@ -8,7 +8,8 @@ $config = require __DIR__ . '/../config/config.php';
 <html>
 <head>
     <title><?php echo $config['callsign']; ?></title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="/css/arwt.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
 </head>
 <body>
     <!-- Sidebar -->

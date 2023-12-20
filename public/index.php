@@ -8,7 +8,8 @@ $config = require __DIR__ . '/../config/config.php';
 <html>
 <head>
     <title><?php echo $config['callsign']; ?></title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="/css/arwt.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
     <script src="https://cdn.jsdelivr.net/npm/showdown@2.1.0/dist/showdown.min.js"></script>
 </head>
 <body>
@@ -20,9 +21,19 @@ Put your content in the markdownContent div. The Showdown library will convert t
 If you need assistance with markdown, see https://stackedit.io/ 
 -->
 <div id="markdownContent" style="display: none;">
+
+<div class="image-container" style="margin:auto; width:100%;">
+    <p align="center">
+        <img src="/images/arwt-transparent.png" alt="ARWT Logo" width="200" height="200">
+        <div class="caption">You can also use HTML/CSS on markdown pages.</div>
+    </p>
+</div>
+
 # Hello ARWT!
 ### What is ARWT?
 ARWT (Amateur Radio Website Template) is a basic web site template to help amateur radio operators make their sites a little prettier.  
+
+Check out the ARWT [repo](https://www.github.com/ds2600/arwt) for more information.
 
 ### Why ARWT?
 While we all enjoy the simplicity of plain HTML, it's nice to have a little style.  ARWT is a simple template that you can use to spruce up your amateur radio web presence.

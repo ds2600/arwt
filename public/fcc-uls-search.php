@@ -19,7 +19,8 @@ if (!$config['uls_search']) {
 <html>
 <head>
     <title>FCC ULS Search</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="/css/arwt.css">
+    <link rel="stylesheet" type="text/css" href="/css/custom.css">
 </head>
 <body>
     <!-- Sidebar -->

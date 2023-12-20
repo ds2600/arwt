@@ -1,0 +1,137 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  body {
+    display: flex;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .sidebar {
+    min-width: 200px;
+    width: 200px;
+    padding: 20px;
+    height: 100vh; /* Full height */
+  }
+  
+  .sidebar a {
+    display: block;
+    padding: 10px;
+  }
+  
+  .sidebar a:hover {
+     border-radius: 8px; 
+  }
+  
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  h1 {
+    font-size: 28px;
+  }
+  
+  p {
+    font-size: 16px;
+  }
+
+  .image-container {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .image-container img {
+    display: block; 
+    height: auto; /* Maintain aspect ratio */
+  }
+  
+  .caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center; 
+    padding: 5px; 
+  }
+  
+  .result-box {
+    border: 1px solid rgba(0, 0, 0, 0.1); /* faint border */
+    border-radius: 8px; /* rounded edges */
+    padding: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px; /* space between boxes */
+    background-color: #f9f9f9; /* light background */
+    font-size: 0.9em; /* smaller font size */
+    text-transform: uppercase; /* all text capitalized */
+  }
+  
+  .result-box .callsign {
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333; /* darker text for the call sign */
+  }
+  
+  .result-box strong {
+    color: #666; /* slightly lighter text for labels */
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  #loading-indicator {
+    font-size: 20px; /* size of the dots */
+    opacity: 0.7;
+    animation: loadingDots 1.5s infinite;
+    margin-top: 10px;
+  }
+  
+  @keyframes loadingDots {
+    0% { opacity: 0.2; }
+    50% { opacity: 1; }
+    100% { opacity: 0.2; }
+  }
+  
+  .search-notice {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+  }
+  
+  footer {
+    margin-top: auto;
+    padding: 10px 0;
+    text-align: center;
+  }
+  
+  .footer-text {
+    font-size: 0.7em;
+  }
+  
+  .footer-text a {
+    display: inline;
+    padding: 0;
+  }
+  
+  code {
+    background-color: #f6f8fa; 
+    border-radius: 4px;
+    border: 1px solid #e1e4e8; 
+    font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-size: 0.95em;
+    padding: 0.2em 0.4em;
+    margin: 0;
+    overflow-x: auto; 
+    display: inline-block; 
+    line-height: 1.4;
+    color: #24292e; 
+  }
+  
+  pre code {
+    display: block; 
+    padding: 1em; 
+    overflow-y: auto; 
+  }

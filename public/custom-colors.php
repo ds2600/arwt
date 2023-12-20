@@ -21,12 +21,35 @@ Put your content in the markdownContent div. The Showdown library will convert t
 If you need assistance with markdown, see https://stackedit.io/ 
 -->
 <div id="markdownContent" style="display: none;">
-# Page Title  
+# Custom Colors  
 
-ARWT uses Showdown.js to convert markdown to HTML.  
-Markdown formatted content should be here.
+You can customize the colors and the overall font of ARWT by editing the /css/custom.css file. This file is loaded after the primary structure CSS, so feel free to add your own customizations here.
 
-![Microphones](/images/microphones.jpg =600x400)
+```
+body {
+    font-family: Arial, sans-serif;
+    background-color: #F8F8F8;
+    color: #1A1A1A;
+}
+
+.sidebar {
+    background-color: #EFEFEF;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: #1A1A1A;
+}
+
+.sidebar a:hover {
+    background-color: #DDD;
+}
+
+.footer-text {
+    color: #666;
+}
+```
+
 
 
 </div>
