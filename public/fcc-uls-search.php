@@ -42,6 +42,6 @@ if (!$config['uls_search']) {
         </div>
     </div>
     <!-- JS for search function -->
-    <script src="search.js"></script>
+    <script src="/js/search.js"></script>
 </body>
 </html>

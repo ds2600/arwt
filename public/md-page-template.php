@@ -20,8 +20,14 @@ Put your content in the markdownContent div. The Showdown library will convert t
 If you need assistance with markdown, see https://stackedit.io/ 
 -->
 <div id="markdownContent" style="display: none;">
-# Page Title
+# Page Title  
+
+ARWT uses Showdown.js to convert markdown to HTML.  
 Markdown formatted content should be here.
+
+![Microphones](/images/microphones.jpg =600x400)
+
+
 </div>
     <!-- Rendered Content. Do not edit or remove. -->
     <div id="renderedContent" class="content">
