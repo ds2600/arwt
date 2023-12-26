@@ -6,7 +6,7 @@ A dead simple web site template for hams to use. It's not special. It's not uniq
 Right now, there's some simple page templates, with possibly a gallery and integration with various log books (Cloudlog, LOTW, etc) on my radar.
 
 ## FCC ULS Search
-The functionality to search the FCC ULS database is built in, as long as you put in some extra work. I'm working on a fork of an existing shell script that will automatically load the FCC ULS data into a database. 
+The functionality to search the FCC ULS database is built in, as long as you put in some extra work. There are existing scripts out there, I've [forked](https://www.github.com/ds2600/FCCULS-mysql2) one of them and am working on updating it to make it actually usable without wasting a bunch of time.  
 
 ## Demo
 You can view a limited demo [here](http://arwt.ds2600.com). It doesn't currently have the FCC ULS search functional, but I'm working on that. 😁
