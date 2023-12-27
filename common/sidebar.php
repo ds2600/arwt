@@ -5,6 +5,9 @@ $menu = require __DIR__ . '/../config/menu.php';
 <div class="sidebar">
     <!-- Navigation links -->
     <h1><?php echo htmlspecialchars($config['callsign']); ?></h1>
+<?php if ($config['gmrs_callsign']): ?>
+    <div class="subtitle"><?php echo htmlspecialchars($config['gmrs_callsign']); ?></div>
+<?php endif; ?>
     <a href="index.php">Home</a>
 <?php   
     foreach ($menu as $menuItem) {

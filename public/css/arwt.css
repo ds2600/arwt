@@ -24,6 +24,12 @@ html, body {
   .sidebar a:hover {
      border-radius: 8px; 
   }
+
+  .sidebar .subtitle {
+    font-size: 14px;
+    color: #666; 
+    margin-bottom: 20px; 
+}
   
   .content {
     flex-grow: 1;
@@ -32,6 +38,7 @@ html, body {
   
   h1 {
     font-size: 28px;
+    margin-bottom: 5px;
   }
   
   p {

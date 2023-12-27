@@ -2,6 +2,7 @@
 
 return [
     'callsign' => '',
+    'gmrs_callsign' => '',
     'db_host' => '',
     'db_user' => '',
     'db_pass' => '',
