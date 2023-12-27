@@ -5,6 +5,9 @@
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
 
+namespace ds2600\ARWT;
+use PDO;
+
 class Database
 {
 	private $db_host = '';

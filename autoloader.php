@@ -1,10 +1,18 @@
 <?php
 spl_autoload_register(function ($className) {
-	$path = __DIR__ . '/classes/';
-	$file = $path . str_replace('\\', '/', $className) . '.php';
-	if (file_exists($file)) {
-		require $file;
-	} else {
-		echo "Class file for {$className} not found.";
-	}
+    $base_dir = __DIR__ . '/classes/';
+
+    $prefix = 'ds2600\\ARWT\\';
+    $prefixLength = strlen($prefix);
+    if (strncmp($prefix, $className, $prefixLength) !== 0) {
+        return;
+    }
+
+    $relative_class = substr($className, $prefixLength);
+
+    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
+
+    if (file_exists($file)) {
+        require $file;
+    }
 });
