@@ -1,0 +1,11 @@
+{
+    "name": "ds2600/arwt",
+    "description": "A dead simple web site template for ham radio operators to use.",
+    "license": "MIT",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "ds2600\\ARWT\\": "classes/"
+        }
+    }
+}

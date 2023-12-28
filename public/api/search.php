@@ -1,6 +1,7 @@
 <?php
 session_start(); // Start session to limit search requests
-require_once __DIR__ . '/../../autoloader.php';
+require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../autoloader.php';
 use ds2600\ARWT\SearchHandler;
 
 
