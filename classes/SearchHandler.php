@@ -8,7 +8,8 @@ class SearchHandler {
 
     public function __construct($config) {
         $this->config = $config;
-        $this->db = new Database($config['db_host'], $config['db_user'], $config['db_pass'], $config['db_name']);
+        $this->db = new Database($config);
+        $this->db->connect();
     }
 
     public function connectToDatabase() {

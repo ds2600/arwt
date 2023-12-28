@@ -10,29 +10,31 @@ use PDO;
 
 class Database
 {
-	private $db_host = '';
-	private $db_user = '';
-	private $db_pass = '';
-	private $db_name = '';
-	private $conn = '';
+	private $conn = null;
+	private $config = null;
 
-	public function __construct($db_host, $db_user, $db_pass, $db_name)
+	public function __construct($config)
 	{
-		$this->db_host = $db_host;
-		$this->db_user = $db_user;
-		$this->db_pass = $db_pass;
-		$this->db_name = $db_name;
+		$this->config = $config;
 	}
 
 	public function connect() {
-		$this->conn = null;
+		$db_host = $_ENV['DB_HOST'];
+		$db_user = $_ENV['DB_USER'];
+        $db_pass = $_ENV['DB_PASS'];
+        $db_name = $_ENV['DB_NAME'];
 
-		try {
-			$this->conn = new PDO("mysql:host=" . $this->db_host . ";dbname=" . $this->db_name, $this->db_user, $this->db_pass);
-			$this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		} catch(PDOException $e) {
-			echo "Connection error: " . $e->getMessage();
+		if ($this->config['debug']) {
+			error_log("Connecting to $db_host as $db_user",0);
 		}
+		
+		try {
+            $dsn = "mysql:host=$db_host;dbname=$db_name;charset=utf8mb4";
+            $this->conn = new PDO($dsn, $db_user, $db_pass);
+            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch(PDOException $e) {
+            echo "Connection error: " . $e->getMessage();
+        }
 
 		return $this->conn;
 	}

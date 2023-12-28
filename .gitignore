@@ -1,2 +1,7 @@
+# Legacy
 config/config.php
+
+# Modern
 /vendor/
+.env
+.env.local
