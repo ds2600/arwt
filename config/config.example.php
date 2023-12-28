@@ -1,16 +1,14 @@
 <?php
 
+// Site Configuration
 return [
-    'callsign' => '',
+    'callsign' => 'ARWT',
     'gmrs_callsign' => '',
-    'db_host' => '',
-    'db_user' => '',
-    'db_pass' => '',
-    'db_name' => '',
     // Enable or disable the FCC ULS search feature - see README.md for more info
-    'uls_search' => false,
+    'uls_search' => true,
     // Limit the number of ULS searches per hour
-    'uls_search_limit' => 10,
+    'uls_search_limit' => 5,
     // Enable or disable debug mode
     'debug' => false,
 ];
+
