@@ -30,7 +30,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ```bash
 sudo apt update
 sudo apt install apache2 -y
-sudo apt install php libapache2-mod-php php-mysql -y
+sudo apt install php libapache2-mod-php php-mysql composer -y
 ```
 2. Clone the repository
 ```bash
