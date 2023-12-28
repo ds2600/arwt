@@ -108,6 +108,12 @@ return [
 ];
 ```
 
-10. Navigate to *&lt;your-domain&gt;* for further instruction.
+10. Navigate to the base directory and install dependencies
+```bash
+cd /var/www/html/arwt  
+composer install
+```
+
+11. Navigate to *&lt;your-domain&gt;* for further instruction.
 
 
