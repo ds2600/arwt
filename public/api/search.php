@@ -17,7 +17,6 @@ use ds2600\ARWT\SearchHandler;
 // Load configuration
 $config = require __DIR__ . '/../../config/config.php';
 $searchHandler = new SearchHandler($config);
-$searchHandler->connectToDatabase();
 
 $callSign = isset($_GET['call-sign']) ? $_GET['call-sign'] : '';
 $results = $searchHandler->performSearch($callSign);
