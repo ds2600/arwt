@@ -9,11 +9,6 @@ class SearchHandler {
     public function __construct($config) {
         $this->config = $config;
         $this->db = new Database($config);
-        $this->db->connect();
-    }
-
-    public function connectToDatabase() {
-        $this->db->connect();
     }
 
     public function performSearch($callSign) {

@@ -29,8 +29,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 1. Install Apache, PHP and Extensions
 ```bash
 sudo apt update
-sudo apt install apache2 -y
-sudo apt install php libapache2-mod-php php-mysql composer -y
+sudo apt install apache2 redis-server -y
+sudo apt install php libapache2-mod-php php-mysql composer php-redis -y
 ```
 2. Clone the repository
 ```bash
