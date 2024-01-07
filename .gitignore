@@ -6,3 +6,7 @@ config/config.php
 .env
 .env.local
 public/trigger.php
+tmp/daily/*
+tmp/weekly/*
+datahandler_status.json
+install.php

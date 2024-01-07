@@ -1,0 +1,10 @@
+CREATE TABLE `PUBACC_LA` (
+  `record_type` char(2) DEFAULT NULL,
+  `unique_system_identifier` decimal(9,0) DEFAULT NULL,
+  `callsign` char(10) DEFAULT NULL,
+  `attachment_code` char(1) DEFAULT NULL,
+  `attachment_desc` varchar(60) DEFAULT NULL,
+  `attachment_date` char(10) DEFAULT NULL,
+  `attachment_filename` varchar(60) DEFAULT NULL,
+  `action_performed` char(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

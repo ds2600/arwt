@@ -1,0 +1,21 @@
+CREATE TABLE `PUBACC_AM` (
+  `record_type` char(2) NOT NULL,
+  `unique_system_identifier` decimal(9,0) NOT NULL,
+  `uls_file_num` char(14) NOT NULL,
+  `ebf_number` varchar(30) DEFAULT NULL,
+  `callsign` char(10) NOT NULL,
+  `operator_class` char(1) DEFAULT NULL,
+  `group_code` char(1) DEFAULT NULL,
+  `region_code` tinyint(4) DEFAULT NULL,
+  `trustee_callsign` char(10) DEFAULT NULL,
+  `trustee_indicator` char(1) DEFAULT NULL,
+  `physician_certification` char(1) DEFAULT NULL,
+  `ve_signature` char(1) DEFAULT NULL,
+  `systematic_callsign_change` char(1) DEFAULT NULL,
+  `vanity_callsign_change` char(1) DEFAULT NULL,
+  `vanity_relationship` char(12) DEFAULT NULL,
+  `previous_callsign` char(10) NOT NULL,
+  `previous_operator_class` char(1) DEFAULT NULL,
+  `trustee_name` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`unique_system_identifier`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

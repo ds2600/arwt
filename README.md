@@ -30,7 +30,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ```bash
 sudo apt update
 sudo apt install apache2 redis-server -y
-sudo apt install php libapache2-mod-php php-mysql composer php-redis -y
+sudo apt install php libapache2-mod-php php-mysql composer php-redis php-zip -y
 ```
 2. Clone the repository
 ```bash

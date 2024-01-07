@@ -1,0 +1,10 @@
+CREATE TABLE `PUBACC_CO` (
+  `record_type` char(2) NOT NULL,
+  `unique_system_identifier` decimal(9,0) NOT NULL,
+  `uls_file_num` char(14) DEFAULT NULL,
+  `callsign` char(10) DEFAULT NULL,
+  `comment_date` char(10) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `status_code` char(1) DEFAULT NULL,
+  `status_date` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
