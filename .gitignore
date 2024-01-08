@@ -10,4 +10,3 @@ tmp/daily/*
 tmp/weekly/*
 tmp/unzipped/*
 datahandler_status.json
-install.php

@@ -8,6 +8,7 @@
 namespace ds2600\ARWT;
 use PDO;
 use Redis;
+use PDOException;
 
 class Database
 {
@@ -49,7 +50,7 @@ class Database
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 			);
 			$this->conn = new PDO($dsn, $db_user, $db_pass, $options);
-        } catch(PDOException $e) {
+	} catch(PDOException $e) {
             echo "Connection error: " . $e->getMessage();
         }
 

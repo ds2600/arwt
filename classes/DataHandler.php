@@ -31,7 +31,7 @@ class DataHandler {
         'AMAT_PUBACC_SC' => 'SC.dat',
         'AMAT_PUBACC_SF' => 'SF.dat',
     ];
-    
+   
 
     public function __construct($config) {
         $this->config = $config;
@@ -41,6 +41,9 @@ class DataHandler {
     // Methods for all
     //
     private function downloadFile($url, $destination) {
+        echo "Downloading " . $url . ". <strong>This could take awhile, please do not refresh</strong>.";
+        ob_flush();
+        flush();
         $source = fopen($url, 'r');
         $dest = fopen($destination, 'w');
     
@@ -48,6 +51,9 @@ class DataHandler {
 
         fclose($source);
         fclose($dest);
+        echo "Done.<br>";
+        ob_flush();
+        flush();
     }
     private function getRunStatus($key) {
         if (file_exists($this->statusFile)) {
@@ -103,18 +109,24 @@ class DataHandler {
                 __DIR__ . '/../sql/create_pubacc_sc.sql',
                 __DIR__ . '/../sql/create_pubacc_sf.sql',
             ];
-            //$this->downloadWeeklyFiles();
-            //$this->unzipWeeklyFiles();
-            //$this->createTables($amat_files);
-            //$this->processInitialFiles('amat', __DIR__ . "/../tmp/unzipped/l_amat.zip/");
+            $this->downloadWeeklyFiles();
+            $this->unzipWeeklyFiles();
+            $this->createTables($amat_files);
+            $this->processInitialFiles('amat', __DIR__ . "/../tmp/unzipped/l_amat.zip/");
+
+            //Commented out until GMRS is implemented
             //$this->processInitialFiles('gmrs', __DIR__ . "/../tmp/unzipped/l_gmrs.zip/");
-            
-            $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip', __DIR__ . '/../tmp/weekly/l_gmrs.zip'];
-            $extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip', __DIR__ . '/../tmp/unzipped/l_gmrs.zip'];
+            //$zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip', __DIR__ . '/../tmp/weekly/l_gmrs.zip'];
+            //$extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip', __DIR__ . '/../tmp/unzipped/l_gmrs.zip'];
+
+            $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip'];
+            $extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip'];
             $this->cleanupSetupFiles($zipFiles, $extractedDirs);
             
             $this->updateRunStatus('initialSetupComplete', true);
-            echo "Initial setup complete<br>";
+            echo "<h2>Initial setup complete</h2>";
+            echo "You should be redirected, but if not, <a href=\"" . $this->config['base_url'] . "/?setupComplete\">click here</a>.";
+            echo "<script>window.location = '" . $this->config['base_url'] . "/?setupComplete';</script>";
             ob_flush();
             flush();
         }
@@ -123,29 +135,32 @@ class DataHandler {
     private function downloadWeeklyFiles() {
         // Download weekly files - they contain all previous FCC data.
         $weeklyHamPath = __DIR__ . '/../tmp/weekly/l_amat.zip';
-        $weeklyGMRSPath = __DIR__ . '/../tmp/weekly/l_gmrs.zip';
+        //$weeklyGMRSPath = __DIR__ . '/../tmp/weekly/l_gmrs.zip';
 
         $this->downloadFile($this->weeklyHam, $weeklyHamPath);
-        $this->downloadFile($this->weeklyGMRS, $weeklyGMRSPath);
+        // Commented out until GMRS is implemented
+        // $this->downloadFile($this->weeklyGMRS, $weeklyGMRSPath);
     }
 
     private function unzipWeeklyFiles() {
-        $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip', __DIR__ . '/../tmp/weekly/l_gmrs.zip']; // Paths to your zip files
+        // Commented out until GMRS is implemented
+        // $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip', __DIR__ . '/../tmp/weekly/l_gmrs.zip']; 
+        $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip']; 
         foreach ($zipFiles as $zipFile) {
             if (file_exists($zipFile)) {
                 $zip = new ZipArchive;
                 if ($zip->open($zipFile) === TRUE) {
                     $fn = pathinfo($zipFile);
-                    echo "Unzipping ". $fn['basename'] . ". Please wait.<br>";
+                    echo "Unzipping ". $fn['basename'] . ". ";
                     ob_flush();
                     flush();                    
-                    $zip->extractTo(__DIR__ . '/../tmp/unzipped/' . $fn['basename']); // Adjust the path as needed
+                    $zip->extractTo(__DIR__ . '/../tmp/unzipped/' . $fn['basename']);
                     $zip->close();
-                    echo "Unzipped " . $fn['basename'] . "<br>";
+                    echo "Done.<br>";
                     ob_flush();
                     flush();
                 } else {
-                    echo "Failed to unzip $zipFile<br>";
+                    echo "Failed to unzip " . $zipFile . ".<br>";
                     ob_flush();
                     flush();
                 }
@@ -155,9 +170,6 @@ class DataHandler {
 
     private function processInitialFiles($cycle, $dir) {
         error_log("Processing files for ". $cycle,0);
-        echo "Starting data import...<br>";
-        ob_flush();
-        flush();
 
         if ($cycle == "amat") {
             $dataFiles = [
@@ -179,9 +191,12 @@ class DataHandler {
             $filePath = $dir . $fileKey. ".dat";
             if (file_exists($filePath)) {
                 try {
+                    echo "Importing data into " . $tableName . ". ";
+                    ob_flush();
+                    flush();
                     $sql = "LOAD DATA LOCAL INFILE '{$filePath}' INTO TABLE {$tableName} FIELDS TERMINATED BY '|' OPTIONALLY ENCLOSED BY '\"' LINES TERMINATED BY '\n'";
                     $this->db->connect()->exec($sql);
-                    echo "Data imported into {$tableName}<br>";
+                    echo "Done.<br>";
                 } catch (\PDOException $e) {
                     echo "Error importing data into {$tableName}: " . $e->getMessage() . "<br>";
                 }
@@ -204,6 +219,8 @@ class DataHandler {
             if ($sql !== false) {
                 $this->db->connect()->exec($sql);
                 echo "Executed CREATE TABLE<br>";
+                ob_flush();
+                flush();
             } else {
                 echo "Failed to read from " . $file . "<br>";
             }
@@ -219,15 +236,17 @@ class DataHandler {
             if (file_exists($file)) {
                 unlink($file);
                 echo "Deleted filed: " . $file . "<br>";
+                ob_flush();
+                flush();
             }
         }
 
         foreach ($directories as $directory) {
             $this->deleteDirectory($directory);
             echo "Deleted directory: " . $directory . "<br>";
+            ob_flush();
+            flush();
         }
-        ob_flush();
-        flush();
     }
 
     //

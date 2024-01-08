@@ -4,6 +4,7 @@
 return [
     'callsign' => 'ARWT',
     'gmrs_callsign' => '',
+    'base_url' => '',
     // Enable or disable the FCC ULS search feature - see README.md for more info
     'uls_search' => true,
     // Limit the number of ULS searches per hour
