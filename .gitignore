@@ -8,5 +8,6 @@ config/config.php
 public/trigger.php
 tmp/daily/*
 tmp/weekly/*
+tmp/unzipped/*
 datahandler_status.json
 install.php

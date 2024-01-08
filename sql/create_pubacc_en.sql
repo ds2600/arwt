@@ -1,4 +1,4 @@
-CREATE TABLE `PUBACC_EN` (
+CREATE TABLE `AMAT_PUBACC_EN` (
   `record_type` char(2) NOT NULL,
   `unique_system_identifier` decimal(9,0) NOT NULL,
   `uls_file_number` char(14) DEFAULT NULL,

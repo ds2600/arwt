@@ -44,8 +44,11 @@ class Database
 		
 		try {
             $dsn = "mysql:host=$db_host;dbname=$db_name;charset=utf8mb4";
-            $this->conn = new PDO($dsn, $db_user, $db_pass);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $options = array (
+				PDO::MYSQL_ATTR_LOCAL_INFILE => true,
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+			);
+			$this->conn = new PDO($dsn, $db_user, $db_pass, $options);
         } catch(PDOException $e) {
             echo "Connection error: " . $e->getMessage();
         }
