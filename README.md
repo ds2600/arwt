@@ -35,21 +35,15 @@ sudo apt install php libapache2-mod-php php-mysql composer php-redis php-zip -y
 2. Clone the repository
 ```bash
 cd /var/www/html
-git clone https://github.com/ds2600/arwt.git
+git clone https://github.com/ds2600/arwt.git && cd arwt
 ```
-3. Set Permissions
-```bash
-sudo chown -R www-data:www-data /var/www/html/arwt
-sudo chmod -R 755 /var/www/html/arwt
-```
-
-4. Create a new virtual host configuration  
+3. Create a new virtual host configuration  
 *Ensure you replace all instances of &lt;your-domain&gt; with your actual domain.*
 ```bash
 sudo vi /etc/apache2/sites-available/<your-domain>.conf
 ```
 
-5. Add the following to the &lt;your-domain&gt;.conf file
+4. Add the following to the &lt;your-domain&gt;.conf file
 ```apacheconf
 <VirtualHost *:80>
     ServerAdmin admin@<your-domain>.com
@@ -67,53 +61,63 @@ sudo vi /etc/apache2/sites-available/<your-domain>.conf
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
 ```
-6. Enable the Virtual Host and mod_rewrite, disable the default Apache site
+
+5. Enable the Virtual Host and mod_rewrite, disable the default Apache site
 ```bash
 sudo a2ensite <your-domain>.conf
 sudo a2enmod rewrite
 sudo a2dissite 000-default.conf
 ```
-7. Reload Apache
+6. Reload Apache
 ```bash
 sudo systemctl reload apache2
 ```
 
-8. Create an ARWT configuration file
+7. Run the installation script, this will set file permissions and create a <code>config.php</code> and <code>.env</code> file.
 ```bash
-cd /var/www/html/arwt
-cp config/config.example.php config/config.php
+sudo chmod +x install.sh
+sudo ./install.sh
 ```
 
-9. Using your favorite text editor, edit the newly created configuration file
+8. Modify the <code>arwt/config/config.php</code> file to reflect your configuration.
 ```bash
 vi config/config.php
 ```
-
 ```php
 // Site Configuration
 return [
-	// Enter your call sign
-	'callsign' => 'KVARWT', 
-	// Enter your database information below, leave empty if not using the FCC ULS Search
-	'db_host' => '', 
-	'db_user' => '',
-	'db_pass' => '',
-	'db_name' => 'ULSDATA',
-	// Enable or disable the FCC ULS search feature - leave as false unless you know otherwise
-	'uls_search' => false,
-	// Limit the number of ULS searches per hour - can be left as default
-	'uls_search_limit' => 10,
-	// Enable or disable debug mode - limited current use
-	'debug' => false,
+    'callsign' => '', // Your call sign
+    'gmrs_callsign' => '', // Your GMRS call sign, if applicable. Optional.
+    'base_url' => '', // Base URL of the web host, probably your domain
+    'uls_search' => false, // Enable or disable FCC ULS search
+    'uls_search_limit' => 5, // Limit the number of ULS searches per hour
+    'redis_cache' => false, // Enable Redis Cache for FCC ULS searches
+    'debug' => false, // Enable or disable debug mode
 ];
 ```
 
-10. Navigate to the base directory and install dependencies
+---  
+
+**Steps 9-10 are only applicable if you are using the FCC ULS search, otherwise, skip to step 11.**  
+
+--- 
+
+9. Modify the <code>.env</code> file with your database information.
 ```bash
-cd /var/www/html/arwt  
-composer install
+vi .env
+```
+```
+DB_HOST=localhost
+DB_NAME=ULSDATA
+DB_USER=root
+DB_PASS=password
 ```
 
-11. Navigate to *&lt;your-domain&gt;* for further instruction.
+10. In your web browser, navigate to <your-domain>/install.php, and follow the installation process. This process will download and install the latest FCC ULS database information.  
+> The FCC usually updates it's weekly file on Saturdays.  
+> To prevent missing data, it's recommended that you complete Step 10 on a Sunday after 12:00PM Eastern time. 
+
+
+11. Once everything is successful, make sure to delete <code>public/install.php</code>.
 
 

@@ -142,3 +142,19 @@ html, body {
     padding: 1em; 
     overflow-y: auto; 
   }
+
+  .alert {
+    height: 50px; /* Height of the banner */
+    line-height: 50px; /* Center text vertically */
+    position: fixed;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000; /* Ensures the banner stays above other content */
+  }
+
+  .alert-danger {
+    background-color: red;
+    color: #333; /* Text color */
+  }

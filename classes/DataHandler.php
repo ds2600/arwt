@@ -9,18 +9,19 @@ namespace ds2600\ARWT;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use ZipArchive;
-
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class DataHandler {
 
     private $config;
     private $db;
+    private $logger;
+    private $errorLogger;
 
     private $weeklyHam = "https://data.fcc.gov/download/pub/uls/complete/l_amat.zip";
     private $weeklyGMRS = "https://data.fcc.gov/download/pub/uls/complete/l_gmrs.zip";
-
     private $statusFile = __DIR__ . '/../datahandler_status.json';
-
     private $dailyFileMappings = [
         'AMAT_PUBACC_AM' => 'AM.dat',
         'AMAT_PUBACC_CO' => 'CO.dat',
@@ -32,18 +33,27 @@ class DataHandler {
         'AMAT_PUBACC_SF' => 'SF.dat',
     ];
    
-
     public function __construct($config) {
         $this->config = $config;
         $this->db = new Database($config);
+        $this->logger = new Logger('datahandler');
+        $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log'));
+
+        $this->errorLogger = new Logger('datahandler');
+        $this->errorLogger->pushHandler(new StreamHandler(__DIR__ . '/../logs/uls_data_errors.log'));
     }
     //
     // Methods for all
     //
-    private function downloadFile($url, $destination) {
-        echo "Downloading " . $url . ". <strong>This could take awhile, please do not refresh</strong>.";
-        ob_flush();
-        flush();
+    private function downloadFile($cycle, $url, $destination) {
+        if ($cycle == "weekly") {
+            $this->logger->info("Downloading " . $url);
+            echo "Downloading " . $url . ". <strong>This could take awhile, please do not refresh</strong>.";
+            ob_flush();
+            flush();
+        } else {
+            $this->logger->info('Downloading ' . $url);
+        }
         $source = fopen($url, 'r');
         $dest = fopen($destination, 'w');
     
@@ -51,16 +61,21 @@ class DataHandler {
 
         fclose($source);
         fclose($dest);
-        echo "Done.<br>";
-        ob_flush();
-        flush();
+        if ($cycle == "weekly") {
+            $this->logger->info("Download complete");
+            echo "Done.<br>";
+            ob_flush();
+            flush();
+        } else {
+            $this->logger->info('Download complete');
+        }
     }
     private function getRunStatus($key) {
         if (file_exists($this->statusFile)) {
             $status = json_decode(file_get_contents($this->statusFile), true);
+            $this->logger->info("Current status: ". $key .":". $status["status"]);
             return isset($status[$key]) ? $status[$key] : false;
         } 
-        
         return false;
     }
 
@@ -70,20 +85,42 @@ class DataHandler {
         } else {
             $status = [];
         }
+        $this->logger->info("Set status: ". $key .":". $value);
         $status[$key] = $value;
         file_put_contents($this->statusFile, json_encode($status));
+    }
+
+    private function cleanupFiles($cycle, $files, $directories) {
+        foreach ($files as $file) {
+            if (file_exists($file)) {
+                unlink($file);
+                $this->logger->info("Deleted file: " . $file);
+                if ($cycle == "setup") {
+                    echo "Deleted filed: " . $file . "<br>";                    
+                    ob_flush();
+                    flush();
+                }
+            }
+        }
+        foreach ($directories as $directory) {
+            $this->deleteDirectory($directory);
+            $this->logger->info("Deleted directory: " . $directory);
+            if ($cycle == "setup") {
+                echo "Deleted directory: " . $directory . "<br>";
+                ob_flush();
+                flush();
+            }
+        }
     }
 
     private function deleteDirectory($dir) {
         if (!file_exists($dir)) {
             return;
         }
-
         $items = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
             RecursiveIteratorIterator::CHILD_FIRST
         );
-
         foreach ($items as $item) {
             if ($item->isDir()) {
                 rmdir($item->getRealPath());
@@ -93,13 +130,21 @@ class DataHandler {
         }
         rmdir($dir);
     }
-
+    
+    private function convertDateToMySQLFormat($date) {
+        if (preg_match('/^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(\d{4})$/', $date, $matches)) {
+            // Convert MM/DD/YYYY to YYYY-MM-DD
+            return $matches[3] . '-' . $matches[1] . '-' . $matches[2];
+        }
+        return null; // Return null if the date is not in the expected format
+    }
     //
     // Initial Setup Methods
     //
     public function initialSetup() {
         if (!$this->getRunStatus('initialSetupComplete')) {
-            $amat_files = [
+            $this->logger->info("Initial setup started");
+            $amat_tables = [
                 __DIR__ . '/../sql/create_pubacc_co.sql',
                 __DIR__ . '/../sql/create_pubacc_am.sql',
                 __DIR__ . '/../sql/create_pubacc_en.sql',
@@ -109,9 +154,11 @@ class DataHandler {
                 __DIR__ . '/../sql/create_pubacc_sc.sql',
                 __DIR__ . '/../sql/create_pubacc_sf.sql',
             ];
+            $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip'];
+            $extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip'];
             $this->downloadWeeklyFiles();
-            $this->unzipWeeklyFiles();
-            $this->createTables($amat_files);
+            $this->unzipWeeklyFiles($zipFiles);
+            $this->createTables($amat_tables);
             $this->processInitialFiles('amat', __DIR__ . "/../tmp/unzipped/l_amat.zip/");
 
             //Commented out until GMRS is implemented
@@ -119,47 +166,46 @@ class DataHandler {
             //$zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip', __DIR__ . '/../tmp/weekly/l_gmrs.zip'];
             //$extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip', __DIR__ . '/../tmp/unzipped/l_gmrs.zip'];
 
-            $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip'];
-            $extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip'];
-            $this->cleanupSetupFiles($zipFiles, $extractedDirs);
-            
+            $this->cleanupFiles("setup", $zipFiles, $extractedDirs);
             $this->updateRunStatus('initialSetupComplete', true);
+            $this->logger->info("Initial setup complete");
             echo "<h2>Initial setup complete</h2>";
-            echo "You should be redirected, but if not, <a href=\"" . $this->config['base_url'] . "/?setupComplete\">click here</a>.";
-            echo "<script>window.location = '" . $this->config['base_url'] . "/?setupComplete';</script>";
+            echo "Your setup is completed, <a href=\"http://" . $this->config['base_url'] . "/?setupComplete\">click here</a>.";
             ob_flush();
             flush();
         }
     }
 
     private function downloadWeeklyFiles() {
+        $this->logger->info("Downloading latest weekly file(s)");
         // Download weekly files - they contain all previous FCC data.
-        $weeklyHamPath = __DIR__ . '/../tmp/weekly/l_amat.zip';
-        //$weeklyGMRSPath = __DIR__ . '/../tmp/weekly/l_gmrs.zip';
-
-        $this->downloadFile($this->weeklyHam, $weeklyHamPath);
         // Commented out until GMRS is implemented
+        //$weeklyGMRSPath = __DIR__ . '/../tmp/weekly/l_gmrs.zip';
         // $this->downloadFile($this->weeklyGMRS, $weeklyGMRSPath);
+        
+        $weeklyHamPath = __DIR__ . '/../tmp/weekly/l_amat.zip';
+        $this->downloadFile('weekly', $this->weeklyHam, $weeklyHamPath);
     }
 
-    private function unzipWeeklyFiles() {
-        // Commented out until GMRS is implemented
-        // $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip', __DIR__ . '/../tmp/weekly/l_gmrs.zip']; 
-        $zipFiles = [__DIR__ . '/../tmp/weekly/l_amat.zip']; 
+    private function unzipWeeklyFiles($zipFiles) {
+        $this->logger->info("Unzipping latest weekly file(s)");
         foreach ($zipFiles as $zipFile) {
             if (file_exists($zipFile)) {
                 $zip = new ZipArchive;
                 if ($zip->open($zipFile) === TRUE) {
                     $fn = pathinfo($zipFile);
+                    $this->logger->info("Unzipping " . $fn['basename']);
                     echo "Unzipping ". $fn['basename'] . ". ";
                     ob_flush();
                     flush();                    
                     $zip->extractTo(__DIR__ . '/../tmp/unzipped/' . $fn['basename']);
                     $zip->close();
+                    $this->logger->info("Unzipped " . $fn['basename']);
                     echo "Done.<br>";
                     ob_flush();
                     flush();
                 } else {
+                    $this->logger->critical("Failed to unzip " . $zipFile);
                     echo "Failed to unzip " . $zipFile . ".<br>";
                     ob_flush();
                     flush();
@@ -169,8 +215,7 @@ class DataHandler {
     }
 
     private function processInitialFiles($cycle, $dir) {
-        error_log("Processing files for ". $cycle,0);
-
+        $this->logger->info("Processing initial files");
         if ($cycle == "amat") {
             $dataFiles = [
                 'AM' => 'AMAT_PUBACC_AM',
@@ -186,11 +231,11 @@ class DataHandler {
             // Put GMRS files here
             die();
         }
-
         foreach ($dataFiles as $fileKey => $tableName) {
             $filePath = $dir . $fileKey. ".dat";
             if (file_exists($filePath)) {
                 try {
+                    $this->logger->info("Importing data into " . $tableName);
                     echo "Importing data into " . $tableName . ". ";
                     ob_flush();
                     flush();
@@ -198,16 +243,17 @@ class DataHandler {
                     $this->db->connect()->exec($sql);
                     echo "Done.<br>";
                 } catch (\PDOException $e) {
+                    $this->logger->critical("Error importing data into " . $tableName . ": " . $e->getMessage());
                     echo "Error importing data into {$tableName}: " . $e->getMessage() . "<br>";
                 }
             } else {
+                $this->logger->alert("File {$filePath} not found.");
                 echo "File {$filePath} not found.<br>";
             }
-    
             ob_flush();
             flush();
         }
-    
+        $this->logger->info("Data import completed");
         echo "Data import completed.<br>";
         ob_flush();
         flush();
@@ -218,90 +264,62 @@ class DataHandler {
             $sql = file_get_contents($file);
             if ($sql !== false) {
                 $this->db->connect()->exec($sql);
+                $this->logger->info("Executed CREATE TABLE: " . $file);
                 echo "Executed CREATE TABLE<br>";
                 ob_flush();
                 flush();
             } else {
+                $this->logger->critical("Failed to read from " . $file);
                 echo "Failed to read from " . $file . "<br>";
             }
-            
         }
+        $this->logger->info("Tables created");
         echo "Tables created<br>";
         ob_flush();
         flush();
     }
-
-    private function cleanupSetupFiles($files, $directories) {
-        foreach ($files as $file) {
-            if (file_exists($file)) {
-                unlink($file);
-                echo "Deleted filed: " . $file . "<br>";
-                ob_flush();
-                flush();
-            }
-        }
-
-        foreach ($directories as $directory) {
-            $this->deleteDirectory($directory);
-            echo "Deleted directory: " . $directory . "<br>";
-            ob_flush();
-            flush();
-        }
-    }
-
     //
     // Daily Update Methods
     //
-
     public function updateDailyData() {
         $prevDay = strtolower(date('D', strtotime('-1 day')));
-        
-        //$this->downloadDailyFiles($prevDay);
-        //$this->unzipDailyFiles($prevDay);
+        //$zipFiles = [__DIR__ . '/../tmp/daily/l_am_' . $prevDay . '.zip', __DIR__ . '/../tmp/daily/l_gm_' . $prevDay . '.zip'];
+        $zipFiles = [__DIR__ . '/../tmp/daily/l_am_' . $prevDay . '.zip'];
+        $extractedDirs = [__DIR__ . '/../tmp/unzipped/l_am_' . $prevDay . '.zip'];
+        $this->logger->info("Beginning daily update for ". $prevDay);
+        $this->downloadDailyFiles($prevDay);
+        $this->unzipDailyFiles($zipFiles);
         $this->processDailyFiles($prevDay);
-
+        $this->cleanupFiles('daily', $zipFiles, $extractedDirs);
         $this->updateRunStatus('lastDailyUpdate', date('Y-m-d H:i:s'));
+        if ($this->config['debug']) {
+            error_log('Daily update complete', 0);
+        }
     }
 
     private function downloadDailyFiles($day) {
         // Dynamically construct the URLs based on the day of the week
         $dailyHamUrl = "https://data.fcc.gov/download/pub/uls/daily/l_am_" . $day . ".zip";
-        $dailyGMRSUrl = "https://data.fcc.gov/download/pub/uls/daily/l_gm_" . $day . ".zip";
-        
+        //$dailyGMRSUrl = "https://data.fcc.gov/download/pub/uls/daily/l_gm_" . $day . ".zip";
         $dailyHamPath = __DIR__ . '/../tmp/daily/l_am_' . $day . '.zip';
         $dailyGMRSPath = __DIR__ . '/../tmp/daily/l_gm_' . $day . '.zip';
-
-        if ($this->config['debug']) {
-            error_log("Downloading daily files for " . $day,0);
-        }
-        
-        $this->downloadFile($dailyHamUrl, $dailyHamPath);
-        $this->downloadFile($dailyGMRSUrl, $dailyGMRSPath);
-        
-        if ($this->config['debug']) {
-            error_log("Download completed for " . $day,0);
-        }
+        $this->downloadFile('daily', $dailyHamUrl, $dailyHamPath);
+        //$this->downloadFile($dailyGMRSUrl, $dailyGMRSPath);
     }
 
-    private function unzipDailyFiles($day) {
-        $zipFiles = [__DIR__ . '/../tmp/daily/l_am_' . $day . '.zip', __DIR__ . '/../tmp/daily/l_gm_' . $day . '.zip']; // Paths to your zip files
+    private function unzipDailyFiles($zipFiles) {
+        $this->logger->info("Unzipping files");
         foreach ($zipFiles as $zipFile) {
             if (file_exists($zipFile)) {
                 $zip = new ZipArchive;
                 if ($zip->open($zipFile) === TRUE) {
                     $fn = pathinfo($zipFile);
-                    if ($this->config['debug']) {
-                        error_log("Unzipping ". $fn['basename'], 0);
-                    }
-                    $zip->extractTo(__DIR__ . '/../tmp/unzipped/' . $fn['basename']); // Adjust the path as needed
+                    $this->logger->info("Unzipping " . $fn['basename']);
+                    $zip->extractTo(__DIR__ . '/../tmp/unzipped/' . $fn['basename']); 
                     $zip->close();
-                    if ($this->config['debug']) {
-                        error_log("Unzipped " . $fn['basename'],0);
-                    }
+                    $this->logger->info("Unzipped " . $fn['basename']);
                 } else {
-                    if ($this->config['debug']) {
-                        error_log("Failed to unzip $zipFile",0);
-                    }
+                    $this->logger->critical("Failed to unzip " . $fn['basename']);
                 }
             }
         }
@@ -317,57 +335,68 @@ class DataHandler {
                     $filePath,
                     $tableName,
                     $fieldMappings[$tableName]['fields'],
-                    $fieldMappings[$tableName]['updateFields']
+                    $fieldMappings[$tableName]['updateFields'],
+                    ['status_date']
                 );
             }
         }
     }
 
-    private function processAndUpdateTable($filePath, $tableName, $fields, $updateFields) {
-        if ($this->config['debug']) {
-            error_log("Updating table " . $tableName,0);
-        }
+    private function processAndUpdateTable($filePath, $tableName, $fields, $updateFields, $datetimeFields = []) {
+        $this->logger->info("Updating table " . $tableName);
         if (!file_exists($filePath)) {
-            if ($this->config['debug']) {
-                error_log("File not found, table probably not updated on this day: " . $filePath,0);
-            }
+            $this->logger->warning("File not found, table probably not updated on this day", ['processAndUpdateTable']);
             return;
         }
     
         $handle = fopen($filePath, "r");
         if ($handle === false) {
-            if ($this->config['debug']) {
-                error_log("Cannot open file: " . $filePath,0);
-            }
+            $this->logger->critical("Cannot open file: ". $filePath, ['processAndUpdateTable']);
             return;
         }
     
         while (($line = fgets($handle)) !== false) {
-            $data = str_getcsv($line, "|", '\"'); // Adjust delimiter and enclosure as per your data
+            $data = str_getcsv($line, "|", '\"'); 
+
+            // Convert datetime fields from MM/DD/YYYY to YYYY-MM-DD and handle empty strings
+            foreach ($datetimeFields as $datetimeField) {
+                $index = array_search($datetimeField, $fields);
+                if ($index !== false) {
+                    if (!empty($data[$index])) {
+                        $data[$index] = $this->convertDateToMySQLFormat($data[$index]);
+                    } else {
+                        $data[$index] = null; // Convert empty strings to NULL
+                    }
+                }
+            }
+
+            // Ensure $data array has the correct number of elements
+            while (count($data) < count($fields)) {
+                $data[] = null;
+            }
+
+            if (count($data) > count($fields)) {
+                if ($this->config['debug']) {
+                    $this->logger->error("Data has more fields than expected. Skipping line.", ['processAndUpdateTable',$tableName]);
+                    $this->errorLogger->error(json_encode($data), ['processAndUpdateTable',$tableName]);
+                }
+                continue;
+            }
     
-            // Construct INSERT INTO ... ON DUPLICATE KEY UPDATE SQL statement
             $insertQuery = "INSERT INTO {$tableName} (" . implode(',', $fields) . ") VALUES (" . implode(',', array_fill(0, count($fields), '?')) . ")";
             $updateQuery = " ON DUPLICATE KEY UPDATE " . implode(',', array_map(function($field) {
                 return "{$field} = VALUES({$field})";
             }, $updateFields));
     
             $sql = $insertQuery . $updateQuery;
-    
             try {
                 $stmt = $this->db->connect()->prepare($sql);
                 $stmt->execute($data);
             } catch (\PDOException $e) {
-                echo "Error processing line in {$tableName}: " . $e->getMessage() . "<br>";
+                $this->logger->critical("Error updating table " . $tableName . ": " . $e->getMessage() . " Data: " . json_encode($data), ['processAndUpdateTable']);
             }
         }
-    
         fclose($handle);
-        if ($this->config['debug']) {
-            error_log("Table " . $tableName . " updated",0);
-        }
+        $this->logger->info("Table " . $tableName . " updated");
     }
-    
-
-
- 
 }

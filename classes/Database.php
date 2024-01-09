@@ -9,17 +9,23 @@ namespace ds2600\ARWT;
 use PDO;
 use Redis;
 use PDOException;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 class Database
 {
 	private $conn = null;
 	private $config = null;
 	private $cache = null;
+	private $logger = null;
 
 	public function __construct($config)
 	{
 		$this->config = $config;
 		$this->initializeCache();
+
+		$this->logger = new Logger('datahandler');
+        $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log'));
 	}
 
 	private function initializeCache() {
@@ -39,9 +45,7 @@ class Database
         $db_pass = $_ENV['DB_PASS'];
         $db_name = $_ENV['DB_NAME'];
 
-		if ($this->config['debug']) {
-			error_log("Connecting to $db_host as $db_user",0);
-		}
+		$this->logger->info("Connecting to database: " . $db_host . " " . $db_name . " " . $db_user);
 		
 		try {
             $dsn = "mysql:host=$db_host;dbname=$db_name;charset=utf8mb4";
@@ -49,9 +53,10 @@ class Database
 				PDO::MYSQL_ATTR_LOCAL_INFILE => true,
 				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
 			);
+			$this->logger->info("Connected to database");
 			$this->conn = new PDO($dsn, $db_user, $db_pass, $options);
-	} catch(PDOException $e) {
-            echo "Connection error: " . $e->getMessage();
+		} catch(PDOException $e) {
+			$this->logger->critical("Failed to connect to database: " . $e->getMessage());
         }
 
 		return $this->conn;
@@ -65,18 +70,21 @@ class Database
 			
 			if ($cachedResult) {
 				if ($this->config['debug']) {
-					error_log("Cache hit for ". $cacheKey,0);
+					$this->logger->info("Cache hit for ". $cacheKey);
 				}
 				return json_decode($cachedResult, true);
 			} else {
 				if ($this->config['debug']) {
-					error_log("Cache miss for ". $cacheKey,0);
+					$this->logger->info("Cache miss for ". $cacheKey);
 				}
 				$result = $this->performDatabaseQuery($callSign);
 				// Store the result in cache with a 48-hour expiration
 				$this->cache->setex($cacheKey, 48 * 60 * 60, json_encode($result));
 			}
 		} else {
+			if ($this->config['debug']) {
+				$this->logger->info("Searching for call sign: " . $callSign);
+			}
 			$result = $this->performDatabaseQuery($callSign);
 		}
 		

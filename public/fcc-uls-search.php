@@ -5,9 +5,7 @@
  * Licensed under the MIT License. See LICENSE file in the project root for full license information.
  */
 
-require __DIR__ . '/../autoloader.php';
-
-$config = require __DIR__ . '/../config/config.php';
+require __DIR__ . '/../bootstrap.php';
 
 if (!$config['uls_search']) {
     header('Location: index.php');

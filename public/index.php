@@ -1,10 +1,5 @@
 <?php
-require __DIR__ . '/../autoloader.php';
-
-$config = require __DIR__ . '/../config/config.php';
-
-require __DIR__ . '/../common/warnings.php';
-
+require __DIR__ . '/../bootstrap.php';
 ?>
 <!DOCTYPE html>
 <html>

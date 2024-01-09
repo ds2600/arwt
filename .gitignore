@@ -10,3 +10,5 @@ tmp/daily/*
 tmp/weekly/*
 tmp/unzipped/*
 datahandler_status.json
+classes/Exceptions.php
+logs/*
