@@ -1,15 +1,17 @@
 <?php
-    require __DIR__ . '/../vendor/autoload.php';
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
-    $dotenv->load();
-    require __DIR__ . '/../autoloader.php';
+    require_once __DIR__ . '/../bootstrap.php';
 
     use ds2600\ARWT\DataHandler;
-
-    $config = require __DIR__ . '/../config/config.php';
     $handler = new DataHandler($config);
 
     echo "<h1>ARWT Setup</h1>";
+    if (!$config['uls_search']) {
+        echo "<p>ULS Search is disabled in your config. If you want to enable it, set <code>uls_search</code> to <code>true</code> in your config.</p>";
+        echo "<p>If you do not intend to use the ULS search, <strong>you should delete <code>public/install.php</code></strong>.</p>";
+        echo "<p><a href=\"/\">Click here to go to the homepage</a></p>";
+        exit;
+    }
+
     if ($handler->getInstallStatus()) {
         echo "<p>Initial setup is complete.</p>";
         echo "<p><a href=\"/\">Click here to go to the homepage</a></p>";
