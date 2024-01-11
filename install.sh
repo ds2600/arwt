@@ -42,7 +42,7 @@ set_file_permissions "sql"
 
 chmod 660 "$PROJECT_DIR/config/config.php"
 chmod 660 "$PROJECT_DIR/.env"
-chmod 644 "$PROJECT_DIR/.htaccess"
+chmod 644 "$PROJECT_DIR/public/.htaccess"
 
 chown -R www-data:www-data "$PROJECT_DIR"
 
