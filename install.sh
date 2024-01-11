@@ -19,6 +19,8 @@ copy_config() {
     fi
 }
 
+sudo a2enmod rewrite
+
 copy_config "config/config.example.php" "config/config.php"
 copy_config ".env.example" ".env"
 
@@ -42,7 +44,11 @@ chmod 660 "$PROJECT_DIR/config/config.php"
 chmod 660 "$PROJECT_DIR/.env"
 chmod 644 "$PROJECT_DIR/.htaccess"
 
+chown -R www-data:www-data "$PROJECT_DIR"
+
 composer install --no-dev
+
+sudo systemctl reload apache2
 
 echo "Installation complete."
 echo "Next - modify the config.php and .env files for your environment."

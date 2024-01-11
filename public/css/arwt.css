@@ -183,6 +183,7 @@ html, body {
     line-height: 50px; 
     position: fixed;
     top: 0;
+    left:0;
     width: 100%;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
