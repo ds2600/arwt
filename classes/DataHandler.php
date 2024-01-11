@@ -79,6 +79,10 @@ class DataHandler {
         return false;
     }
 
+    public function getInstallStatus() {
+        return $this->getRunStatus('initialSetupComplete');
+    }
+
     private function updateRunStatus($key, $value) {
         if (file_exists($this->statusFile)) {
             $status = json_decode(file_get_contents($this->statusFile), true);

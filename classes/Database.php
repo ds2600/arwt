@@ -68,14 +68,15 @@ class Database
 			$cacheKey = "searchCallSign_" . md5($callSign);
 			$cachedResult = $this->cache->get($cacheKey);
 			
+			$this->logger->debug("Redis caching enabled");
 			if ($cachedResult) {
 				if ($this->config['debug']) {
-					$this->logger->info("Cache hit for ". $cacheKey);
+					$this->logger->debug("Cache hit for ". $cacheKey);
 				}
 				return json_decode($cachedResult, true);
 			} else {
 				if ($this->config['debug']) {
-					$this->logger->info("Cache miss for ". $cacheKey);
+					$this->logger->debug("Cache miss for ". $cacheKey);
 				}
 				$result = $this->performDatabaseQuery($callSign);
 				// Store the result in cache with a 48-hour expiration
@@ -83,7 +84,7 @@ class Database
 			}
 		} else {
 			if ($this->config['debug']) {
-				$this->logger->info("Searching for call sign: " . $callSign);
+				$this->logger->debug("Searching for call sign: " . $callSign);
 			}
 			$result = $this->performDatabaseQuery($callSign);
 		}
@@ -105,15 +106,17 @@ class Database
 		AM.previous_callsign,
 		SF.lic_freeform_condition
 	  FROM 
-		PUBACC_EN AS EN
-		LEFT JOIN PUBACC_AM AS AM ON EN.unique_system_identifier = AM.unique_system_identifier
-		LEFT JOIN PUBACC_SF AS SF ON EN.unique_system_identifier = SF.unique_system_identifier
+	    AMAT_PUBACC_EN AS EN
+		LEFT JOIN AMAT_PUBACC_AM AS AM ON EN.unique_system_identifier = AM.unique_system_identifier
+		LEFT JOIN AMAT_PUBACC_SF AS SF ON EN.unique_system_identifier = SF.unique_system_identifier
 	  WHERE 
 		EN.call_sign LIKE :callSign";
 
 		$stmt = $this->conn->prepare($query);
 		$stmt->execute(['callSign' => "%$callSign%"]);
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+		$stmt->closeCursor();
+		return $result;
 	}
 	
 }

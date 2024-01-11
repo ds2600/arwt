@@ -7,9 +7,14 @@
     use ds2600\ARWT\DataHandler;
 
     $config = require __DIR__ . '/../config/config.php';
+    $handler = new DataHandler($config);
 
     echo "<h1>ARWT Setup</h1>";
-        
+    if ($handler->getInstallStatus()) {
+        echo "<p>Initial setup is complete.</p>";
+        echo "<p><a href=\"/\">Click here to go to the homepage</a></p>";
+        exit;
+    }
     if (!isset($_GET['start'])) {
         echo "<p>The speed of the installation is based a lot on the internet speed of the server.</p>
         <p>This will create the necessary tables in your database, so ensure your <code>.env</code> file is correct.</p> 
@@ -23,6 +28,5 @@
         echo "Beginning setup...<br>";
         ob_flush();
         flush();
-        $handler = new DataHandler($config);
         $handler->initialSetup();
     }

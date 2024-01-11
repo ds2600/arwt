@@ -1,7 +1,7 @@
 <?php
 // Menu Configuration
 return [
-        ['text' => 'HTML Page Template', 'url' => 'html-page-template.php'],
-        ['text' => 'MD Page Template', 'url' => 'md-page-template.php'],
-        ['text' => 'Custom Colors', 'url' => 'custom-colors.php'],
+        ['text' => 'HTML Page Template', 'page' => 'html_template'],
+        ['text' => 'MD Page Template', 'page' => 'md_template'],
+        ['text' => 'Custom Colors', 'page' => 'custom_colors'],
 ];

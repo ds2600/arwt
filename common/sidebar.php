@@ -8,16 +8,14 @@ $menu = require __DIR__ . '/../config/menu.php';
 <?php if ($config['gmrs_callsign']): ?>
     <div class="subtitle"><?php echo htmlspecialchars($config['gmrs_callsign']); ?></div>
 <?php endif; ?>
-    <a href="index.php">Home</a>
+    <a href="/home">Home</a>
 <?php   
     foreach ($menu as $menuItem) {
-        echo '<a href="' . htmlspecialchars($menuItem['url']) . '">' . htmlspecialchars($menuItem['text']) . '</a>';
+        echo '<a href="/' . htmlspecialchars($menuItem['page']) . '">' . htmlspecialchars($menuItem['text']) . '</a>';
     }
 ?>
     <?php if ($config['uls_search']): ?>
         <a href="fcc-uls-search.php">FCC ULS Search</a>
     <?php endif; ?>
     
-    <!-- Footer -->
-    <?php include __DIR__ . '/../common/footer.php'; ?>
 </div>

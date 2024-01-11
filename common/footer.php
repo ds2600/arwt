@@ -2,6 +2,8 @@
 <?php
     require __DIR__ . '/version.php';
 ?>
+</body>
+</html>
 <footer>
     <p class="footer-text">
     <?php 

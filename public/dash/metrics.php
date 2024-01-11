@@ -7,6 +7,7 @@ $dotenv->load();
 require __DIR__ . '/../../autoloader.php';
 
 use ds2600\ARWT\Database;
+use ds2600\ARWT\DataHandler;
 
 $config = require __DIR__ . '/../../config/config.php';
 
@@ -22,8 +23,8 @@ echo "<h1>ARWT Metrics</h1>";
 echo "<h2>Server Info</h2>";
 echo "CPU Load: " . $cpuLoad[0] . "<br>";
 echo "Memory Usage: " . $memoryUsage . "<br>";
-echo "<h2>Database Info</h2>";
 echo 'Active Sessions: ' . count($sessionFiles) . '<br>';
+echo "<h2>Database Info</h2>";
 echo "Connections: " . $status['Connections'] . "<br>";
 echo "Uptime: " . $status['Uptime'] . " seconds<br>";
 echo "Queries since start: " . $status['Queries'] . "<br>";
