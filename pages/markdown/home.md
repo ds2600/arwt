@@ -1,8 +1,8 @@
 <div class="image-container" style="margin:auto; width:100%;">
-    <p align="center">
+    <div align="center">
         <img src="/images/arwt-transparent.png" alt="ARWT Logo" width="200" height="200">
         <div class="caption">You can also use HTML/CSS on markdown pages.</div>
-    </p>
+    </div>
 </div>
 
 # Hello ARWT!

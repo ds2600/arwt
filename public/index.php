@@ -8,8 +8,6 @@ if (file_exists(__DIR__ . '/install.php') && $_ENV['ENVIRONMENT'] !== 'dev') {
     echo "<style>body { margin-top:50px; }</style>";
 }
 echo "<body>";
-include __DIR__ . '/../common/sidebar.php';
-
 function sanitizePageName($page) {
     return preg_replace('/[^a-z0-9_\-]/i', '', $page);
 }
@@ -35,6 +33,13 @@ if (file_exists($markdownDir . $page . '.md')) {
     $content .= file_get_contents($htmlDir . '404.html');
     $content .= "</div>";
 }
-
+echo "<div class=\"page-container\">";
+echo "<div class=\"content-wrapper\">";
+include __DIR__ . '/../common/sidebar.php';
+echo "<main>";
 echo $content;
+echo "</main>";
+echo "</div>";
 include __DIR__ . '/../common/footer.php';
+echo "</div>";
+echo "</body></html>";

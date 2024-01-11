@@ -4,16 +4,52 @@ html, body {
   }
   
   body {
-    display: flex;
     margin: 0;
     padding: 0;
   }
-  
+
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .content-wrapper {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+
   .sidebar {
     min-width: 200px;
     width: 200px;
     padding: 20px;
-    height: 100vh; /* Full height */
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  main {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  footer {
+    margin-top: -60px;
+    padding: 10px 0;
+    text-align: center;
+    max-height:50px;
+  }
+  
+  .footer-text {
+    font-size: 0.7em;
+  }
+  
+  .footer-text a {
+    display: inline;
+    padding: 0;
   }
   
   .sidebar a {
@@ -43,6 +79,20 @@ html, body {
   
   p {
     font-size: 16px;
+  }
+
+  label {
+    padding: .5em;
+  }
+  
+  input[type="text"] {
+    padding: .5em;
+    margin: .25em;
+  }
+
+  button {
+    padding: .5em;
+    margin: .25em;
   }
 
   .image-container {
@@ -106,21 +156,6 @@ html, body {
     color: #666;
     font-size: 0.9em;
     margin-bottom: 10px;
-  }
-  
-  footer {
-    margin-top: auto;
-    padding: 10px 0;
-    text-align: center;
-  }
-  
-  .footer-text {
-    font-size: 0.7em;
-  }
-  
-  .footer-text a {
-    display: inline;
-    padding: 0;
   }
   
   code {

@@ -4,12 +4,12 @@ PROJECT_DIR=$(pwd)
 
 set_dir_permissions() {
     echo "Setting directory permissions..."
-    find "$PROJECT_DIR" -type d -exec chmod 775 {} \;
+    sudo find "$PROJECT_DIR" -type d -exec chmod 775 {} \;
 }
 
 set_file_permissions() {
     echo "Setting file permissions..."
-    find "$PROJECT_DIR/$1" -type f -exec chmod 644 {} \;
+    sudo find "$PROJECT_DIR/$1" -type f -exec chmod 644 {} \;
 }
 
 copy_config() {
@@ -30,6 +30,7 @@ set_dir_permissions "sql"
 set_dir_permissions "tmp"
 
 chmod -R 770 "$PROJECT_DIR/tmp"
+chmod -R 750 "$PROJECT_DIR/public/dash"
 
 set_file_permissions "classes"
 set_file_permissions "common"
