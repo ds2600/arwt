@@ -9,6 +9,7 @@ namespace ds2600\ARWT;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use ZipArchive;
+use DateTime;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
@@ -171,6 +172,7 @@ class DataHandler {
             //$extractedDirs = [__DIR__ . '/../tmp/unzipped/l_amat.zip', __DIR__ . '/../tmp/unzipped/l_gmrs.zip'];
 
             $this->cleanupFiles("setup", $zipFiles, $extractedDirs);
+            $this->downloadMissingUpdates();
             $this->updateRunStatus('initialSetupComplete', true);
             $this->logger->info("Initial setup complete");
             echo "<h2>Initial setup complete</h2>";
@@ -282,10 +284,53 @@ class DataHandler {
         ob_flush();
         flush();
     }
+
+    public function downloadMissingUpdates() {
+        echo "Getting missing updates<br>";
+        ob_flush();
+        flush();
+        $this->logger->info("Getting missing updates");
+
+        $currentDay = new DateTime();
+        $dayOfWeek = $currentDay->format('w');
+        
+        if ($dayOfWeek == 0) {
+            echo "No missing updates to download<br>";
+            ob_flush();
+            flush();
+            return;
+        }
+
+        $updateDay = new DateTime('last Monday');
+        while ($updateDay < $currentDay) {
+            $dayStr = strtolower($updateDay->format('D'));
+            $zipFile = __DIR__ . "/../tmp/daily/l_am_{$dayStr}.zip";
+            $extractedDir = __DIR__ . "/../tmp/unzipped/l_am_{$dayStr}.zip";
+
+            $url = "https://data.fcc.gov/download/pub/uls/daily/l_am_{$dayStr}.zip";
+
+            $this->downloadFile('daily', $url, $zipFile);
+            $this->unzipDailyFiles([$zipFile]);
+            $this->processDailyFiles($dayStr);
+
+            $this->cleanupFiles('daily', [$zipFile], [$extractedDir]);
+
+            $updateDay->modify('+1 day');
+        } 
+        echo "Missing updates loaded<br>";
+        ob_flush();
+        flush();
+        $this->logger->info("Missing updates loaded");
+    }
+
     //
     // Daily Update Methods
     //
     public function updateDailyData() {
+        if (!$this->getRunStatus('initialSetupComplete')) {
+            $this->logger->warning("Initial setup not complete, cannot run daily update");
+            return;
+        }
         $prevDay = strtolower(date('D', strtotime('-1 day')));
         //$zipFiles = [__DIR__ . '/../tmp/daily/l_am_' . $prevDay . '.zip', __DIR__ . '/../tmp/daily/l_gm_' . $prevDay . '.zip'];
         $zipFiles = [__DIR__ . '/../tmp/daily/l_am_' . $prevDay . '.zip'];
@@ -358,7 +403,9 @@ class DataHandler {
             $this->logger->critical("Cannot open file: ". $filePath, ['processAndUpdateTable']);
             return;
         }
-    
+        
+        $integrityViolationCount = 0;
+        $linesUpdated = 0;
         while (($line = fgets($handle)) !== false) {
             $data = str_getcsv($line, "|", '\"'); 
 
@@ -380,13 +427,16 @@ class DataHandler {
             }
 
             if (count($data) > count($fields)) {
-                if ($this->config['debug']) {
-                    $this->logger->error("Data has more fields than expected. Skipping line.", ['processAndUpdateTable',$tableName]);
+                $integrityViolationCount++;
+                if ($this->config['debug'] && $this->config['uls_log_errors']) {
+                    $this->logger->error("Data has more fields than expected. Trimming line.", ['processAndUpdateTable',$tableName]);
                     $this->errorLogger->error(json_encode($data), ['processAndUpdateTable',$tableName]);
                 }
                 continue;
             }
-    
+
+            $data = array_slice($data, 0, count($fields));
+
             $insertQuery = "INSERT INTO {$tableName} (" . implode(',', $fields) . ") VALUES (" . implode(',', array_fill(0, count($fields), '?')) . ")";
             $updateQuery = " ON DUPLICATE KEY UPDATE " . implode(',', array_map(function($field) {
                 return "{$field} = VALUES({$field})";
@@ -394,6 +444,7 @@ class DataHandler {
     
             $sql = $insertQuery . $updateQuery;
             try {
+                $linesUpdated++;
                 $stmt = $this->db->connect()->prepare($sql);
                 $stmt->execute($data);
             } catch (\PDOException $e) {
@@ -401,6 +452,10 @@ class DataHandler {
             }
         }
         fclose($handle);
-        $this->logger->info("Table " . $tableName . " updated");
+        $this->logger->info($linesUpdated . " lines updated", ['processAndUpdateTable']);
+        if ($integrityViolationCount > 0) {
+            $this->logger->warning("Data integrity violation(s) detected. Count: " . $integrityViolationCount, ['processAndUpdateTable']);
+        }
+        $this->logger->info("Table " . $tableName . " updated.");
     }
 }
