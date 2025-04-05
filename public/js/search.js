@@ -58,12 +58,13 @@ function displayResults(results) {
     results.slice().reverse().forEach(function(result) {
         var box = document.createElement('div');
         box.className = 'result-box';
-        var cacheIndicator = '';
+        var cacheIndicator = result.cached ? '<span class="cached">💾</span>' : '';
         box.innerHTML = `
-            <div class="callsign">${cacheIndicator} ${result.call_sign}</div>
+            <div class="callsign">${result.call_sign} ${cacheIndicator}</div>
             <strong>Name:</strong> ${result.entity_name}<br>
             <strong>Address:</strong> ${result.street_address}, ${result.city}, ${result.state} ${result.zip_code}<br> 
             <strong>Class:</strong> ${result.operator_class}<br>
+            <strong>Granted:</strong> ${result.grant_date} / <strong>Expires:</strong> ${result.expired_date}<br>
         `;
         resultsDiv.insertBefore(box, resultsDiv.firstChild);
     });
@@ -112,7 +113,8 @@ function loadSearchHistory() {
                     <strong>Name:</strong> ${result.entity_name}<br>
                     <strong>Address:</strong> ${result.street_address}, ${result.city}, ${result.state} ${result.zip_code}<br> 
                     <strong>Class:</strong> ${result.operator_class}<br>
-                `;
+                    <strong>Granted:</strong> ${result.grant_date} / <strong>Expires:</strong> ${result.expired_date}<br>
+               `;
                 resultsDiv.insertBefore(box, resultsDiv.firstChild); 
             });
         }

@@ -63,21 +63,28 @@ class Database
 			if ($cachedResult) {
 				if ($this->config['debug']) {
 					error_log("Cache hit for ". $cacheKey,0);
-				}
+                }
+
                 $result = json_decode($cachedResult, true);
-//                $result['cached'] = true;
+                foreach ($result as $key => $value) {
+                    $result[$key]['cached'] = true;
+                }
 			} else {
 				if ($this->config['debug']) {
 					error_log("Cache miss for ". $cacheKey,0);
 				}
                 $result = $this->performDatabaseQuery($callSign);
- //               $result['cached'] = false;
+                foreach ($result as $key => $value) {
+                    $result[$key]['cached'] = false;
+                }
 				// Store the result in cache with a 48-hour expiration
 				$this->cache->setex($cacheKey, 48 * 60 * 60, json_encode($result));
 			}
 		} else {
             $result = $this->performDatabaseQuery($callSign);
- //           $result['cached'] = false;
+            foreach ($result as $key => $value) {
+                $result[$key]['cached'] = false;
+            }
 		}
 		
 		return $result;
@@ -92,15 +99,20 @@ class Database
 		EN.street_address, 
 		EN.city, 
 		EN.state, 
-		EN.zip_code,
+        EN.zip_code,
+        EN.frn,
 		AM.operator_class, 
 		AM.previous_callsign,
-		SF.lic_freeform_condition
+        SF.lic_freeform_condition,
+        HD.grant_date,
+        HD.expired_date,
+        HD.cancellation_date
 	  FROM 
 		PUBACC_EN AS EN
 		LEFT JOIN PUBACC_AM AS AM ON EN.unique_system_identifier = AM.unique_system_identifier
 		LEFT JOIN PUBACC_SF AS SF ON EN.unique_system_identifier = SF.unique_system_identifier
-	  WHERE 
+		LEFT JOIN PUBACC_HD AS HD ON EN.unique_system_identifier = HD.unique_system_identifier
+      WHERE 
 		EN.call_sign LIKE :callSign";
 
 		$stmt = $this->conn->prepare($query);
