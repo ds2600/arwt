@@ -53,7 +53,8 @@ class Database
 		return $this->conn;
 	}
 
-	public function searchCallSign($callSign) {
+    public function searchCallSign($callSign) {
+        $result = [];
 
 		if ($this->config['redis_cache']) {
 			$cacheKey = "searchCallSign_" . md5($callSign);
@@ -63,17 +64,20 @@ class Database
 				if ($this->config['debug']) {
 					error_log("Cache hit for ". $cacheKey,0);
 				}
-				return json_decode($cachedResult, true);
+                $result = json_decode($cachedResult, true);
+//                $result['cached'] = true;
 			} else {
 				if ($this->config['debug']) {
 					error_log("Cache miss for ". $cacheKey,0);
 				}
-				$result = $this->performDatabaseQuery($callSign);
+                $result = $this->performDatabaseQuery($callSign);
+ //               $result['cached'] = false;
 				// Store the result in cache with a 48-hour expiration
 				$this->cache->setex($cacheKey, 48 * 60 * 60, json_encode($result));
 			}
 		} else {
-			$result = $this->performDatabaseQuery($callSign);
+            $result = $this->performDatabaseQuery($callSign);
+ //           $result['cached'] = false;
 		}
 		
 		return $result;

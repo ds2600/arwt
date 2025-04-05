@@ -58,8 +58,9 @@ function displayResults(results) {
     results.slice().reverse().forEach(function(result) {
         var box = document.createElement('div');
         box.className = 'result-box';
+        var cacheIndicator = '';
         box.innerHTML = `
-            <div class="callsign">${result.call_sign}</div>
+            <div class="callsign">${cacheIndicator} ${result.call_sign}</div>
             <strong>Name:</strong> ${result.entity_name}<br>
             <strong>Address:</strong> ${result.street_address}, ${result.city}, ${result.state} ${result.zip_code}<br> 
             <strong>Class:</strong> ${result.operator_class}<br>
@@ -72,7 +73,7 @@ function displayResults(results) {
     separator.textContent = `Search for "${callSignInput.value}" - ${new Date().toLocaleString()}`;
     resultsDiv.insertBefore(separator, resultsDiv.firstChild);
 
-    saveToHistory({ separator: separator.textContent, results: results });
+    saveToHistory({ results: results, separator: separator.textContent});
 }
 
 function saveToHistory(searchData) {
@@ -96,11 +97,7 @@ function loadSearchHistory() {
 
     history.forEach(function(searchData) {
         // Add separator first
-        var separator = document.createElement('div');
-        separator.className = 'search-separator';
-        separator.textContent = searchData.separator;
-        resultsDiv.insertBefore(separator, resultsDiv.firstChild); 
-
+        
         // Then add results (if any)
         if (searchData.results.length === 0) {
             var p = document.createElement('p');
@@ -119,6 +116,11 @@ function loadSearchHistory() {
                 resultsDiv.insertBefore(box, resultsDiv.firstChild); 
             });
         }
+        var separator = document.createElement('div');
+        separator.className = 'search-separator';
+        separator.textContent = searchData.separator;
+        resultsDiv.insertBefore(separator, resultsDiv.firstChild); 
+
     });
 }
 
