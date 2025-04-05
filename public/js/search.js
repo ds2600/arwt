@@ -1,6 +1,4 @@
 function performSearch() {
-    var resultsDiv = document.getElementById('search-results');
-    resultsDiv.innerHTML = ''; // Clear previous results
     var callSignInput = document.getElementById('call-sign');
     var searchButton = document.querySelector('#search-form button');
     var loadingIndicator = document.getElementById('loading-indicator');
@@ -39,31 +37,92 @@ function displayResults(results) {
     var callSignInput = document.getElementById('call-sign');
     var searchButton = document.querySelector('#search-form button');
 
-    resultsDiv.innerHTML = ''; // Clear previous results
     loadingIndicator.classList.add('hidden');
     callSignInput.disabled = false;
     searchButton.disabled = false;
 
     if (results.length === 0) {
+        var separator = document.createElement('div');
+        separator.className = 'search-separator';
+        separator.textContent = `Search for "${callSignInput.value}" - ${new Date().toLocaleString()}`;
+        resultsDiv.insertBefore(separator, resultsDiv.firstChild); 
+
         var p = document.createElement('p');
         p.textContent = 'No results found';
-        resultsDiv.appendChild(p);
+        resultsDiv.insertBefore(p, resultsDiv.firstChild); 
+
+        saveToHistory({ separator: separator.textContent, results: [] });
         return;
     }
 
-    var ul = document.createElement('ul');
-
-    results.forEach(function(result) {
+    results.slice().reverse().forEach(function(result) {
         var box = document.createElement('div');
         box.className = 'result-box';
-
         box.innerHTML = `
             <div class="callsign">${result.call_sign}</div>
             <strong>Name:</strong> ${result.entity_name}<br>
             <strong>Address:</strong> ${result.street_address}, ${result.city}, ${result.state} ${result.zip_code}<br> 
             <strong>Class:</strong> ${result.operator_class}<br>
         `;
+        resultsDiv.insertBefore(box, resultsDiv.firstChild);
+    });
 
-        resultsDiv.appendChild(box);
+    var separator = document.createElement('div');
+    separator.className = 'search-separator';
+    separator.textContent = `Search for "${callSignInput.value}" - ${new Date().toLocaleString()}`;
+    resultsDiv.insertBefore(separator, resultsDiv.firstChild);
+
+    saveToHistory({ separator: separator.textContent, results: results });
+}
+
+function saveToHistory(searchData) {
+    let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+    history.unshift(searchData); 
+    localStorage.setItem('searchHistory', JSON.stringify(history));
+}
+
+function clearHistory() {
+    var resultsDiv = document.getElementById('search-results');
+    resultsDiv.innerHTML = ''; 
+    localStorage.removeItem('searchHistory'); 
+    var p = document.createElement('p');
+    p.textContent = 'Search history cleared.';
+    resultsDiv.insertBefore(p, resultsDiv.firstChild);
+}
+
+function loadSearchHistory() {
+    var resultsDiv = document.getElementById('search-results');
+    let history = JSON.parse(localStorage.getItem('searchHistory') || '[]').reverse(); 
+
+    history.forEach(function(searchData) {
+        // Add separator first
+        var separator = document.createElement('div');
+        separator.className = 'search-separator';
+        separator.textContent = searchData.separator;
+        resultsDiv.insertBefore(separator, resultsDiv.firstChild); 
+
+        // Then add results (if any)
+        if (searchData.results.length === 0) {
+            var p = document.createElement('p');
+            p.textContent = 'No results found';
+            resultsDiv.insertBefore(p, resultsDiv.firstChild); 
+        } else {
+            searchData.results.slice().reverse().forEach(function(result) {
+                var box = document.createElement('div');
+                box.className = 'result-box';
+                box.innerHTML = `
+                    <div class="callsign">${result.call_sign}</div>
+                    <strong>Name:</strong> ${result.entity_name}<br>
+                    <strong>Address:</strong> ${result.street_address}, ${result.city}, ${result.state} ${result.zip_code}<br> 
+                    <strong>Class:</strong> ${result.operator_class}<br>
+                `;
+                resultsDiv.insertBefore(box, resultsDiv.firstChild); 
+            });
+        }
     });
 }
+
+window.onload = function() {
+    loadSearchHistory();
+};
+

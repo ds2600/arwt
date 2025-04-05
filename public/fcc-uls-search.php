@@ -36,6 +36,7 @@ if (!$config['uls_search']) {
             <label for="call-sign">Call Sign:</label>
             <input type="text" id="call-sign" name="call-sign">
             <button onclick="performSearch()">Search</button>
+            <button onclick="clearHistory()">Clear</button>
             <div id="loading-indicator" class="hidden">...</div>
         </div>
         <div id="search-results">
