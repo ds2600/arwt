@@ -41,7 +41,31 @@ function displayResults(results) {
     callSignInput.disabled = false;
     searchButton.disabled = false;
 
-    if (results.length === 0) {
+    let history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+    let matchedEntry = null;
+    let matchIndex = -1;
+
+    for (let i = 0; i < history.length; i++) {
+        const histResults = history[i].results;
+        if (histResults.length === results.length) {
+            const isFullMatch = histResults.every((histItem, idx) => {
+                const newItem = results[idx];
+                return Object.keys(histItem).every(key => 
+                    key === 'cached' || histItem[key] === newItem[key]
+                );
+            });
+            if (isFullMatch) {
+                matchedEntry = history[i];
+                matchIndex = i;
+                break;
+            }
+        }
+    }
+
+    if (matchedEntry) {
+        history.splice(matchIndex, 1);
+        localStorage.setItem('searchHistory', JSON.stringify(history));
+    } else if (results.length === 0) {
         var separator = document.createElement('div');
         separator.className = 'search-separator';
         separator.textContent = `Search for "${callSignInput.value}" - ${new Date().toLocaleString()}`;

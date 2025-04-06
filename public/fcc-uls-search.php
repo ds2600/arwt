@@ -39,7 +39,7 @@ if (!$config['uls_search']) {
             <button onclick="clearHistory()">Clear</button>
             <div id="loading-indicator" class="hidden">...</div>
         </div>
-        <div id="search-results">
+        <div id="search-results" style="padding-bottom: 2rem;">
             <!-- Search results will be displayed here -->
         </div>
     </div>

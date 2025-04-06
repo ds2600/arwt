@@ -113,7 +113,9 @@ class Database
 		LEFT JOIN PUBACC_SF AS SF ON EN.unique_system_identifier = SF.unique_system_identifier
 		LEFT JOIN PUBACC_HD AS HD ON EN.unique_system_identifier = HD.unique_system_identifier
       WHERE 
-		EN.call_sign LIKE :callSign";
+        EN.call_sign LIKE :callSign
+      ORDER BY
+        HD.grant_date DESC";
 
 		$stmt = $this->conn->prepare($query);
 		$stmt->execute(['callSign' => "%$callSign%"]);

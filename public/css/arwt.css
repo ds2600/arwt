@@ -1,9 +1,10 @@
-html, body {
+html {
     height: 100%;
     margin: 0;
   }
   
   body {
+    min-height: 100%;
     display: flex;
     margin: 0;
     padding: 0;
@@ -13,7 +14,8 @@ html, body {
     min-width: 200px;
     width: 200px;
     padding: 20px;
-    height: 100vh; /* Full height */
+    min-height: 100vh; 
+    box-sizing: border-box;
   }
   
   .sidebar a {
@@ -34,6 +36,7 @@ html, body {
   .content {
     flex-grow: 1;
     padding: 20px;
+    box-sizing: border-box;
   }
   
   h1 {
@@ -52,7 +55,7 @@ html, body {
   
   .image-container img {
     display: block; 
-    height: auto; /* Maintain aspect ratio */
+    height: auto; 
   }
   
   .caption {
