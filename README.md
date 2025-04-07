@@ -116,4 +116,8 @@ composer install
 
 11. Navigate to *&lt;your-domain&gt;* for further instruction.
 
+## Todo
+- Cleanup menu
+- Fix versioning
+- Add ULS search by name
 
