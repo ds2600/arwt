@@ -1,4 +1,4 @@
-function performSearch() {
+function performCallSignSearch() {
     var callSignInput = document.getElementById('call-sign');
     var searchButton = document.querySelector('#search-form button');
     var loadingIndicator = document.getElementById('loading-indicator');
@@ -26,6 +26,39 @@ function performSearch() {
         loadingIndicator.classList.add('hidden');
         callSignInput.disabled = false;
         searchButton.disabled = false;
+
+    };
+    xhr.send();
+}
+
+function performNameSearch() {
+    var nameInput = document.getElementById('call-sign');
+    var nameSearchButton = document.querySelector('#search-form button');
+    var loadingIndicator = document.getElementById('loading-indicator');
+    var searchName = nameInput.value.trim();
+
+    loadingIndicator.classList.remove('hidden');
+    nameInput.disabled = true;
+    nameSearchButton.disabled = true;
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'api/search.php?name=' + encodeURIComponent(searchName), true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var results = JSON.parse(xhr.responseText);
+            console.log(results);
+            if (results.error) {
+                alert(results.error);
+            } else {
+                displayResults(results);    
+            }
+        } else {
+            console.error('Error in search request');
+        }
+
+        loadingIndicator.classList.add('hidden');
+        nameInput.disabled = false;
+        nameSearchButton.disabled = false;
 
     };
     xhr.send();

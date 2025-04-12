@@ -78,7 +78,7 @@ class Database
                     $result[$key]['cached'] = false;
                 }
 				// Store the result in cache with a 48-hour expiration
-				$this->cache->setex($cacheKey, 48 * 60 * 60, json_encode($result));
+				$this->cache->setex($cacheKey, 72 * 60 * 60, json_encode($result));
 			}
 		} else {
             $result = $this->performDatabaseQuery($callSign);
@@ -90,36 +90,81 @@ class Database
 		return $result;
 	}
 
-	private function performDatabaseQuery($callSign) {
-		$this->connect();
+    public function searchName($name) {
+        $result = [];
 
-		$query = "SELECT 
-		EN.call_sign, 
-		EN.entity_name, 
-		EN.street_address, 
-		EN.city, 
-		EN.state, 
-        EN.zip_code,
-        EN.frn,
-		AM.operator_class, 
-		AM.previous_callsign,
-        SF.lic_freeform_condition,
-        HD.grant_date,
-        HD.expired_date,
-        HD.cancellation_date
-	  FROM 
-		PUBACC_EN AS EN
-		LEFT JOIN PUBACC_AM AS AM ON EN.unique_system_identifier = AM.unique_system_identifier
-		LEFT JOIN PUBACC_SF AS SF ON EN.unique_system_identifier = SF.unique_system_identifier
-		LEFT JOIN PUBACC_HD AS HD ON EN.unique_system_identifier = HD.unique_system_identifier
-      WHERE 
-        EN.call_sign LIKE :callSign
-      ORDER BY
-        HD.grant_date DESC";
+		if ($this->config['redis_cache']) {
+			$cacheKey = "searchName_" . md5($name);
+			$cachedResult = $this->cache->get($cacheKey);
+			
+			if ($cachedResult) {
+				if ($this->config['debug']) {
+					error_log("Cache hit for ". $cacheKey,0);
+                }
 
-		$stmt = $this->conn->prepare($query);
-		$stmt->execute(['callSign' => "%$callSign%"]);
-		return $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $result = json_decode($cachedResult, true);
+                foreach ($result as $key => $value) {
+                    $result[$key]['cached'] = true;
+                }
+			} else {
+				if ($this->config['debug']) {
+					error_log("Cache miss for ". $cacheKey,0);
+				}
+                $result = $this->performDatabaseQuery($name, true);
+                foreach ($result as $key => $value) {
+                    $result[$key]['cached'] = false;
+                }
+				// Store the result in cache with a 48-hour expiration
+				$this->cache->setex($cacheKey, 72 * 60 * 60, json_encode($result));
+			}
+		} else {
+            $result = $this->performDatabaseQuery($name, true);
+            foreach ($result as $key => $value) {
+                $result[$key]['cached'] = false;
+            }
+		}
+		
+		return $result;
 	}
-	
+
+    private function performDatabaseQuery($value, $searchByName = false) {
+        try {
+            if (!$this->conn) {
+                $this->connect();
+            }
+
+            $query = "SELECT 
+                EN.call_sign, 
+                EN.entity_name, 
+                EN.street_address, 
+                EN.city, 
+                EN.state, 
+                EN.zip_code,
+                EN.frn,
+                AM.operator_class, 
+                AM.previous_callsign,
+                SF.lic_freeform_condition,
+                HD.grant_date,
+                HD.expired_date,
+                HD.cancellation_date
+            FROM 
+                PUBACC_EN AS EN
+                LEFT JOIN PUBACC_AM AS AM ON EN.unique_system_identifier = AM.unique_system_identifier
+                LEFT JOIN PUBACC_SF AS SF ON EN.unique_system_identifier = SF.unique_system_identifier
+                LEFT JOIN PUBACC_HD AS HD ON EN.unique_system_identifier = HD.unique_system_identifier
+            WHERE 
+                " . ($searchByName ? "EN.entity_name LIKE :searchValue" : "EN.call_sign LIKE :searchValue") . "
+            ORDER BY
+                STR_TO_DATE(HD.grant_date, '%m/%d/%Y') DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->execute(['searchValue' => "%$value%"]);
+
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Database query failed: " . $e->getMessage());
+            throw new Exception("An error occurred while querying the database.");
+        }
+    }
+
 }

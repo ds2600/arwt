@@ -33,9 +33,10 @@ if (!$config['uls_search']) {
             Searches are limited to <?php echo htmlspecialchars($config['uls_search_limit']); ?> per hour<br>
         </div>
         <div id="search-form">
-            <label for="call-sign">Call Sign:</label>
+            <label for="call-sign">Call Sign or Name:</label>
             <input type="text" id="call-sign" name="call-sign">
-            <button onclick="performSearch()">Search</button>
+            <button id="call-sign-button" onclick="performCallSignSearch()">Search Call Sign</button>
+            <button id="name-button" onclick="performNameSearch()">Search Name</button>
             <button onclick="clearHistory()">Clear</button>
             <div id="loading-indicator" class="hidden">...</div>
         </div>

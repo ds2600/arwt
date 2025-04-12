@@ -14,12 +14,25 @@ require __DIR__ . '/../../autoloader.php';
 
 use ds2600\ARWT\SearchHandler;
 
+if (empty($_GET['call-sign']) && empty($_GET['name'])) {
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'required']);
+    exit;
+}
+
 // Load configuration
 $config = require __DIR__ . '/../../config/config.php';
 $searchHandler = new SearchHandler($config);
 
-$callSign = isset($_GET['call-sign']) ? $_GET['call-sign'] : '';
-$results = $searchHandler->performSearch($callSign);
+if (isset($_GET['call-sign'])) {
+    $callSign = isset($_GET['call-sign']) ? $_GET['call-sign'] : '';
+    $results = $searchHandler->performSearch($callSign);
+} elseif (isset($_GET['name'])) {
+    $name = isset($_GET['name']) ? $_GET['name'] : '';
+    $results = $searchHandler->performNameSearch($name);
+} else {
+    $results = [];
+}
 
 header('Content-Type: application/json');
 echo json_encode($results);
