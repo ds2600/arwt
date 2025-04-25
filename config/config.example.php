@@ -12,5 +12,11 @@ return [
     'redis_cache' => true,
     // Enable or disable debug mode
     'debug' => false,
+    // Enable frontend - false provides only the API
+    'frontend' => true,
+    // API 'local' or 'remote'
+    'api' => 'local',
+    // API Endpoint - for use with 'remote' - include trailing slash
+    'api_endpoint' => 'https://api.example.com/',
 ];
 

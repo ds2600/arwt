@@ -2,6 +2,14 @@
  // Start session to limit search requests
 session_start();
 
+$config = require __DIR__ . '/../../config/config.php';
+
+if ($config['api'] === 'remote') {
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'API not supported']);
+    exit;
+}
+
 // Composer autoloader
 require __DIR__ . '/../../vendor/autoload.php';
 
@@ -20,8 +28,6 @@ if (empty($_GET['call-sign']) && empty($_GET['name'])) {
     exit;
 }
 
-// Load configuration
-$config = require __DIR__ . '/../../config/config.php';
 $searchHandler = new SearchHandler($config);
 
 if (isset($_GET['call-sign'])) {

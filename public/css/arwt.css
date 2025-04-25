@@ -159,3 +159,99 @@ html {
     border-radius: 5px;
 }
 
+.image-container img {
+  max-width: 100%;
+}
+
+h1 {
+  font-size: clamp(1.5rem, 5vw, 1.75rem);
+}
+
+p {
+  font-size: clamp(0.875rem, 3vw, 1rem);
+}
+
+.sidebar .subtitle,
+.search-notice,
+.footer-text,
+.result-box {
+  font-size: clamp(0.75rem);
+}
+
+code {
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+}
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    min-width: 100%;
+    width: 100%;
+    min-height: auto;
+    padding: 15px;
+  }
+
+  .sidebar a {
+    padding: 8px;
+  }
+
+  .content {
+    padding: 15px;
+  }
+
+  .result-box {
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  footer {
+    padding: 8px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    padding: 10px;
+  }
+
+  .sidebar a {
+    padding: 6px;
+  }
+
+  .content {
+    padding: 10px;
+  }
+
+  .caption {
+    font-size: 0.75rem;
+    padding: 3px;
+  }
+
+  #loading-indicator {
+    font-size: 16px;
+  }
+
+  .search-separator {
+    padding: 3px;
+    margin: 8px 0;
+  }
+}
+
+.sidebar,
+.content,
+.result-box,
+footer {
+  transition: all 0.3s ease;
+}
+
+.result-box:hover {
+  background-color: #f1f1f1;
+  transform: translateY(-2px);
+}
+
+.sidebar a:hover {
+  transform: translateX(5px);
+}

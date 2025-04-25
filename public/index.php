@@ -1,8 +1,5 @@
 <?php
-require __DIR__ . '/../autoloader.php';
-
-$config = require __DIR__ . '/../config/config.php';
-
+require __DIR__ . '/../common/init.php';
 ?>
 <!DOCTYPE html>
 <html>

@@ -1,3 +1,5 @@
+const apiUrl = window.AppConfig.apiUrl;
+
 function performCallSignSearch() {
     var callSignInput = document.getElementById('call-sign');
     var searchButton = document.querySelector('#search-form button');
@@ -9,7 +11,7 @@ function performCallSignSearch() {
     searchButton.disabled = true;
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'api/search.php?call-sign=' + encodeURIComponent(callSign), true);
+    xhr.open('GET', `${apiUrl}api/search.php?call-sign=` + encodeURIComponent(callSign), true);
     xhr.onload = function() {
         if (xhr.status === 200) {
             var results = JSON.parse(xhr.responseText);
@@ -42,7 +44,7 @@ function performNameSearch() {
     nameSearchButton.disabled = true;
 
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'api/search.php?name=' + encodeURIComponent(searchName), true);
+    xhr.open('GET', `${apiUrl}api/search.php?name=` + encodeURIComponent(searchName), true);
     xhr.onload = function() {
         if (xhr.status === 200) {
             var results = JSON.parse(xhr.responseText);

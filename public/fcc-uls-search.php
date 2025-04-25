@@ -1,16 +1,18 @@
 <?php
-/*
- * This file is part of the Amateur Radio Website Template (ARWT).
- * (c) 2024 William Bunce
- * Licensed under the MIT License. See LICENSE file in the project root for full license information.
- */
-
-require __DIR__ . '/../autoloader.php';
-
-$config = require __DIR__ . '/../config/config.php';
-
+require __DIR__ . '/../common/init.php';
 if (!$config['uls_search']) {
     header('Location: index.php');
+    exit;
+}
+
+if ($config['api'] === 'local') {
+    $scheme = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'];
+    $apiEndpoint = "$scheme://$host/";
+} elseif ($config['api'] === 'remote') {
+    $apiEndpoint = $config['api_endpoint'];
+} else {
+    echo "Invalid API configuration.";
     exit;
 }
 ?>
@@ -19,6 +21,7 @@ if (!$config['uls_search']) {
 <html>
 <head>
     <title>FCC ULS Search</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="/css/arwt.css">
     <link rel="stylesheet" type="text/css" href="/css/custom.css">
 </head>
@@ -45,6 +48,12 @@ if (!$config['uls_search']) {
         </div>
     </div>
     <!-- JS for search function -->
+    <script>
+        window.AppConfig = {
+            apiUrl: <?php echo json_encode(rtrim($apiEndpoint, '/').'/', JSON_UNESCAPED_SLASHES); ?>
+        };
+    </script>
+
     <script src="/js/search.js"></script>
 </body>
 </html>
