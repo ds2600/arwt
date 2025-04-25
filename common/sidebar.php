@@ -15,7 +15,7 @@ $menu = require __DIR__ . '/../config/menu.php';
     }
 ?>
     <?php if ($config['uls_search']): ?>
-        <a href="fcc-uls-search.php">FCC ULS Search</a>
+        <a href="license-search.php">License Search</a>
     <?php endif; ?>
     
     <!-- Footer -->

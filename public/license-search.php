@@ -31,7 +31,7 @@ if ($config['api'] === 'local') {
     
     <!-- Content -->
     <div class="content">
-        <h1>FCC ULS Search</h1>
+        <h1>License Search</h1>
         <div class="search-notice">
             Searches are limited to <?php echo htmlspecialchars($config['uls_search_limit']); ?> per hour<br>
         </div>
